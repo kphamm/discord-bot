@@ -24,11 +24,14 @@
   "dependencies": {
     "@discordjs/builders": "^0.11.0",
     "@discordjs/rest": "^0.2.0-canary.0",
+    "coingecko-api": "^1.0.10",
     "discord-api-types": "^0.26.1",
     "discord.js": "^13.6.0",
     "dotenv": "^14.2.0",
     "fetch": "^1.1.0",
-    "fs": "^0.0.1-security"
+    "fs": "^0.0.1-security",
+    "npm": "^8.3.2",
+    "request-promise": "^4.2.6"
   },
   "devDependencies": {
     "eslint": "^8.7.0"
