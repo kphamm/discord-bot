@@ -33,7 +33,10 @@
     "fs": "^0.0.1-security",
     "node-fetch": "^2.6.7",
     "npm": "^8.3.2",
-    "request-promise": "^4.2.6"
+    "request-promise": "^4.2.6",
+    "web3": "^1.7.0",
+    "web3-eth": "^1.7.0",
+    "web3-eth-ens": "^1.7.0"
   },
   "devDependencies": {
     "eslint": "^8.7.0"
