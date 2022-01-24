@@ -8,8 +8,6 @@ const etherscan = process.env.etherscan;
 const opensea = process.env.opensea;
 const coin = process.env.coin;
 
-const assets = new Map();
-
 const data = new SlashCommandBuilder()
   .setName("networth")
   .setDescription("Returns a wallet's networth")
@@ -30,6 +28,7 @@ const options = {
 module.exports = {
   data,
   async execute(interaction) {
+    const assets = new Map();
     await interaction.deferReply();
     const address = interaction.options.getString("address");
     let ethBalance = 0;
@@ -48,7 +47,7 @@ module.exports = {
     })
     .catch(error => console.log(error));
 
-    await fetch(`https://api.opensea.io/api/v1/assets?owner=${address}&order_direction=desc&offset=0&limit=50`, options)
+    await fetch(`https://api.opensea.io/api/v1/assets?owner=${address}&order_by=sale_price&order_direction=desc&offset=0&limit=50`, options)
       .then(response => response.json())
       .then(response => {
         const obj = response.assets;
@@ -111,7 +110,6 @@ module.exports = {
             { name: 'NFTs', value: `${nftEthBalance}\n$${nftEthBalanceUSD}\n`, inline: true },
             { name: 'Total', value: `${totalEthBalance}\n$${totalEthBalanceUSD}\n`, inline: true },
         );
-
 
     return interaction.editReply({
       embeds: [embed],
