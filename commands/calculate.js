@@ -34,7 +34,7 @@ module.exports = {
         .addFields(
             { name: 'Gwei', value: `${gweiOneHalf}\n${gweiThreeFourth}\n${gweiNineTenth}`, inline: true },
             { name: 'Total Cost (ETH)', value: `${oneHalf}\n${threeFourth}\n${nineTenth}`, inline: true },
-        )
+        );
     return interaction.reply({
         embeds: [embed],
         ephemeral: false,

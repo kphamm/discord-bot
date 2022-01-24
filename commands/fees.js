@@ -1,10 +1,8 @@
 require("dotenv").config();
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { DiscordAPIError } = require("discord.js");
-const sdk = require('api')('@opensea/v1.0#1felivgkyk6vyw2');
 const fetch = require('node-fetch');
 const rp = require("request-promise");
-const Web3 = require('web3');
 const etherscan = process.env.etherscan;
 const coin = process.env.coin;
 
@@ -68,7 +66,7 @@ module.exports = {
     totalGas = (totalGas / (10 ** 18)).toFixed(2);
     const usdGas = (totalGas*ethPrice).toFixed(2);
     return interaction.reply({
-      content: `u have spent ${totalGas} eth on gas. right now that's $${usdGas}`,
+      content: `You have spent ${totalGas} eth on gas. Right now that's worth $${usdGas}`,
       ephemeral: false,
     });
   },

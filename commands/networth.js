@@ -1,10 +1,14 @@
 require("dotenv").config();
+const { MessageEmbed } = require('discord.js');
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { DiscordAPIError } = require("discord.js");
-const sdk = require('api')('@opensea/v1.0#1felivgkyk6vyw2');
+const rp = require("request-promise");
 const fetch = require('node-fetch');
 const etherscan = process.env.etherscan;
-const opensea = process.env.opensea
+const opensea = process.env.opensea;
+const coin = process.env.coin;
+
+const assets = new Map();
 
 const data = new SlashCommandBuilder()
   .setName("networth")
@@ -18,11 +22,19 @@ const data = new SlashCommandBuilder()
       .setRequired(true)
   );
 
+const options = {
+  method: 'GET',
+  headers: { Accept: 'application/json', 'X-API-KEY': `${opensea}` }
+};
+
 module.exports = {
   data,
   async execute(interaction) {
+    await interaction.deferReply();
     const address = interaction.options.getString("address");
-    let balance;
+    let ethBalance = 0;
+    let nftEthBalance = 0;
+    let ethPrice;
     await fetch(`https://api.etherscan.io/api?module=account&action=balance&address=${address}&tag=latest&apikey=${etherscan}`)
     .then(response => {
         // indicates whether the response is successful (status code 200-299) or not
@@ -32,28 +44,77 @@ module.exports = {
         return response.json();
     })
     .then(response => {
-        balance = (response.result / (10 ** 18)).toFixed(2);
+        ethBalance = (response.result / (10 ** 18)).toFixed(2);
     })
     .catch(error => console.log(error));
 
-    // sdk['getting-assets']({
-    //     owner: '0x6E36ad41DF9Bd51D58d17352b03b69B7f1619ae9',
-    //     order_by: 'TOTAL_PRICE',
-    //     order_direction: 'desc',
-    //     offset: '0',
-    //     limit: '20',
-    //     'X-API-KEY': '5ef1a3e29dfd46308ce02f70d59f4e0b'
-    //   })
-    //     .then(res => console.log(res))
-    //     .catch(err => console.error(err));
+    await fetch(`https://api.opensea.io/api/v1/assets?owner=${address}&order_direction=desc&offset=0&limit=50`, options)
+      .then(response => response.json())
+      .then(response => {
+        const obj = response.assets;
+        for (const property in obj) {
+          const contractAddress = obj[property].collection.slug;
+          if (!assets.has(`${contractAddress}`)){
+            assets.set(`${contractAddress}`, 1);
+          }
+          else {
+            assets.set(`${contractAddress}`, (assets.get(`${contractAddress}`))+1);
+          }}})
+      .catch(err => console.error(err));
 
-    // collect assets
-    // collect count of each asset
-    // do a call for each collection and get floor
-    // multiple quantiy by floor then sum them up then add to balance
+    for (const [slug, count] of assets) {
+        await fetch(`https://api.opensea.io/api/v1/collection/${slug}`, options)
+          .then(response => response.json())
+          .then(response => {
+              let collectionPrice = response.collection.stats.floor_price;
+              if(collectionPrice){
+                nftEthBalance += (collectionPrice * count);
+              }
+          })
+          .catch(err => console.error(err));
+    }
 
-    return interaction.reply({
-      content: `ur wallet has ${balance} eth`,
+    const ethPriceCall = {
+      method: "GET",
+      uri: "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest",
+      qs: {
+        symbol: 'ETH',
+      },
+      headers: {
+        "X-CMC_PRO_API_KEY": `${coin}`,
+      },
+      json: true,
+      gzip: true,
+    };
+    await rp(ethPriceCall)
+      .then((response) => {
+        ethPrice = response.data['ETH'].quote.USD.price;
+      })
+      .catch((err) => {
+        console.log("API call error:", err.message);
+      });
+
+      nftEthBalance = nftEthBalance.toFixed(2);
+      const ethBalanceUSD = (ethPrice * ethBalance).toFixed(2);
+      const nftEthBalanceUSD = (ethPrice * nftEthBalance).toFixed(2);
+
+      const totalEthBalance = (Number(ethBalance) + Number(nftEthBalance)).toFixed(2);
+      const totalEthBalanceUSD = (Number(ethBalanceUSD) + Number(nftEthBalanceUSD)).toFixed(2);
+
+      const embed = new MessageEmbed()
+        .setColor('#2ECC71')
+        .setTitle('Networth')
+        .setDescription('Calculates your wallet net worth')
+        .setThumbnail('https://static.wikia.nocookie.net/maid-dragon/images/5/57/Kanna_Anime.png/revision/latest/scale-to-width-down/503?cb=20180225164809')
+        .addFields(
+            { name: 'Balance', value: `${ethBalance}\n$${ethBalanceUSD}\n`, inline: true },
+            { name: 'NFTs', value: `${nftEthBalance}\n$${nftEthBalanceUSD}\n`, inline: true },
+            { name: 'Total', value: `${totalEthBalance}\n$${totalEthBalanceUSD}\n`, inline: true },
+        );
+
+
+    return interaction.editReply({
+      embeds: [embed],
       ephemeral: false,
     });
   },
