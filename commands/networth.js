@@ -34,6 +34,8 @@ module.exports = {
     let ethBalance = 0;
     let nftEthBalance = 0;
     let ethPrice;
+    let breakLoop = false;
+    let offset = 0;
     await fetch(`https://api.etherscan.io/api?module=account&action=balance&address=${address}&tag=latest&apikey=${etherscan}`)
     .then(response => {
         // indicates whether the response is successful (status code 200-299) or not
@@ -46,20 +48,31 @@ module.exports = {
         ethBalance = (response.result / (10 ** 18)).toFixed(2);
     })
     .catch(error => console.log(error));
-
-    await fetch(`https://api.opensea.io/api/v1/assets?owner=${address}&order_by=sale_price&order_direction=desc&offset=0&limit=50`, options)
-      .then(response => response.json())
-      .then(response => {
-        const obj = response.assets;
-        for (const property in obj) {
-          const contractAddress = obj[property].collection.slug;
-          if (!assets.has(`${contractAddress}`)){
-            assets.set(`${contractAddress}`, 1);
+    while(true){
+      await fetch(`https://api.opensea.io/api/v1/assets?owner=${address}&order_direction=desc&offset=${offset}&limit=50`, options)
+        .then(response => response.json())
+        .then(response => {
+          const obj = response.assets;
+          let len = Object.keys(obj).length;
+          if(len === 50){
+            offset += 50;
           }
-          else {
-            assets.set(`${contractAddress}`, (assets.get(`${contractAddress}`))+1);
-          }}})
-      .catch(err => console.error(err));
+          else{
+            breakLoop = true;
+          }
+          for (const property in obj) {
+            const contractAddress = obj[property].collection.slug;
+            if (!assets.has(`${contractAddress}`)){
+              assets.set(`${contractAddress}`, 1);
+            }
+            else {
+              assets.set(`${contractAddress}`, (assets.get(`${contractAddress}`))+1);
+            }}})
+        .catch(err => console.error(err));
+        if(breakLoop){
+          break;
+        }
+    }
 
     for (const [slug, count] of assets) {
         await fetch(`https://api.opensea.io/api/v1/collection/${slug}`, options)
