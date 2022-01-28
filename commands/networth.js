@@ -68,8 +68,12 @@ module.exports = {
             else {
               assets.set(`${contractAddress}`, (assets.get(`${contractAddress}`))+1);
             }}})
-        .catch(err => console.error(err));
-        if(breakLoop){
+        .catch(
+          err => { 
+            console.error(err);
+            breakLoop = true;
+          });
+        if (breakLoop){
           break;
         }
     }

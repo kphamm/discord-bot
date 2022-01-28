@@ -116,7 +116,12 @@ async execute(interaction) {
         .addFields(
             { name: 'Website', value: `[Website](${external_url})`, inline: true },
             { name: 'OpenSea', value: `[OpenSea](https://opensea.io/collection/${slug})`, inline: true },
-            { name: 'Contract', value: `[Etherscan](https://etherscan.io/address/${address})`, inline: true }
+            { name: 'LooksRare', value: `[LooksRare](https://looksrare.org/collections/${address})`, inline: true }
+        )
+        .addFields(
+            { name: 'Contract', value: `[Etherscan](https://etherscan.io/address/${address})`, inline: true },
+            { name: 'NFT Nerds', value: `[NFT Nerds](https://nftnerds.ai/collection/${slug})`, inline: true },
+            { name: 'TraitSniper', value: `[TraitSniper](https://app.traitsniper.com/${slug})`, inline: true }
         );
 
     return interaction.reply({
