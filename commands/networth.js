@@ -30,7 +30,22 @@ module.exports = {
   async execute(interaction) {
     const assets = new Map();
     await interaction.deferReply();
-    const address = interaction.options.getString("address");
+    let address = interaction.options.getString("address");
+    if (address.toLowerCase() === 'sean' || address.toLowerCase() === 'ewata' || address.toLowerCase() === 'seani'){
+      address = "0x3c34aaa83bf919e93332c1f7aafbbf18e73bfd00";
+    }
+    else if (address.toLowerCase() === 'kevin' || address.toLowerCase() === 'chrollo'){
+      address = "0x6e36ad41df9bd51d58d17352b03b69b7f1619ae9";
+    }
+    else if (address.toLowerCase() === 'larry' || address.toLowerCase() === 'humga'){
+      address = "0xe4b7c09f4553cd5ba3ea10a4510335fe2daa1c28";
+    }
+    else if (address.toLowerCase() === 'steven'){
+      address = "0x3350f72e3f64cd6a6eab44c6b9d8372377cf3139";
+    }
+    else if (address.toLowerCase() === 'ryan'){
+      address = "0x4afeff03eeef73bb51a1f2e56a5b8ecfad414fad";
+    }
     let ethBalance = 0;
     let nftEthBalance = 0;
     let ethPrice;
@@ -120,6 +135,7 @@ module.exports = {
       const embed = new MessageEmbed()
         .setColor('#2ECC71')
         .setTitle('Networth')
+        .setURL(`https://opensea.io/${address}`)
         .setDescription('Calculates your wallet net worth')
         .setThumbnail('https://static.wikia.nocookie.net/maid-dragon/images/5/57/Kanna_Anime.png/revision/latest/scale-to-width-down/503?cb=20180225164809')
         .addFields(
