@@ -46,8 +46,8 @@ module.exports = {
     else if (address.toLowerCase() === 'ryan'){
       address = "0x4afeff03eeef73bb51a1f2e56a5b8ecfad414fad";
     }
-    else if(address.toLowerCase === 'vyprr'){
-      address = "0x95F1a181e7A249086dAF859D4701725DAEbd0dB8"
+    else if (address.toLowerCase() === 'vyprr'){
+      address = "0x95F1a181e7A249086dAF859D4701725DAEbd0dB8";
     }
     let ethBalance = 0;
     let nftEthBalance = 0;
