@@ -37,8 +37,10 @@ module.exports = {
         for (const property in obj) {
             const gas = Number(obj[property].gasUsed);
             const gasPrice = Number(obj[property].gasPrice);
-            if(!isNaN(gas)){
+            if (!isNaN(gas)){
+              if (Number(obj[property].timeStamp) < 1641024000){
                 totalGas += gas * gasPrice;
+              }
             }
         }
     })
